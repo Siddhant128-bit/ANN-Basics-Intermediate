@@ -6,21 +6,21 @@ import os
 def get_inputs(player_cords,flag,vel):
     if flag==0:
         keys=pygame.key.get_pressed()
-        player_cords[2]=[0,0,0,0]
+        player_cords[2]=[0,0,0,0,1]
         if keys[pygame.K_LEFT]:
             player_cords[0]-=vel
-            player_cords[2]=[1,0,0,0]
+            player_cords[2]=[1,0,0,0,0]
 
         elif keys[pygame.K_RIGHT]:
             player_cords[0]+=vel
-            player_cords[2]=[0,1,0,0]
+            player_cords[2]=[0,1,0,0,0]
         
         elif keys[pygame.K_UP]:
             player_cords[1]-=vel
-            player_cords[2]=[0,0,1,0]
+            player_cords[2]=[0,0,1,0,0]
         elif keys[pygame.K_DOWN]:
             player_cords[1]+=vel
-            player_cords[2]=[0,0,0,1]
+            player_cords[2]=[0,0,0,1,0]
         
     return player_cords
 
@@ -71,7 +71,7 @@ def dump_dataset(pl_cords,po_cords,op_cords):
     except:
         pass
     
-    with open('Dataset\\data.txt','a') as f:
+    with open('Dataset\\data.csv','a') as f:
         f.write(final_data)
         f.write('\n')
 
@@ -139,8 +139,13 @@ def start_game(flag):
 
 
         for event in pygame.event.get():
-            if event.type==pygame.QUIT:
+            if event.type==pygame.QUIT: #To terminate the game press close button on the display
                 run=False
+            else: 
+                keys=pygame.key.get_pressed() #To Terminate press Escape key on the keyboard
+                if keys[pygame.K_ESCAPE]:
+                    run=False
+                    
         pygame.display.update()
         win.fill((0,0,0))
         pygame.time.delay(20)
