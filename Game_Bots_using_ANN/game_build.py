@@ -1,20 +1,26 @@
 import pygame
 import random
+import math
+import os
 
 def get_inputs(player_cords,flag,vel):
     if flag==0:
         keys=pygame.key.get_pressed()
+        player_cords[2]=[0,0,0,0]
         if keys[pygame.K_LEFT]:
             player_cords[0]-=vel
+            player_cords[2]=[1,0,0,0]
 
         elif keys[pygame.K_RIGHT]:
             player_cords[0]+=vel
+            player_cords[2]=[0,1,0,0]
         
         elif keys[pygame.K_UP]:
             player_cords[1]-=vel
-        
+            player_cords[2]=[0,0,1,0]
         elif keys[pygame.K_DOWN]:
             player_cords[1]+=vel
+            player_cords[2]=[0,0,0,1]
         
     return player_cords
 
@@ -52,13 +58,31 @@ def move_opponent(cords1,cords2,score):
         cords2[1]+=o_vel_increase
     return cords2
 
+def dump_dataset(pl_cords,po_cords,op_cords):
+    final_data=''
+    player_cords=pl_cords[0:2]
+    choices=pl_cords[-1]
+    final_data=','.join([str(i)for i in player_cords])
+    final_data=final_data+','+','.join([str(round(i,2)) for i in po_cords])+','+','.join([str(round(i,2)) for i in op_cords])+','+','.join([str(round(i,2)) for i in choices])
+
+    print(final_data)
+    try: 
+        os.mkdir('Dataset')
+    except:
+        pass
+    
+    with open('Dataset\\data.txt','a') as f:
+        f.write(final_data)
+        f.write('\n')
+
+
 def start_game(flag):
     run=True
     vel=5
     pygame.init()
     win=pygame.display.set_mode((500,500))
 
-    player_cords=[255,255]
+    player_cords=[255,255,[0,0,0,0]]
     opp_cords=[random.randrange(0,470),random.randrange(30,470)]
     power_cords=[random.randrange(0,470),random.randrange(30,470)]
     score=0
@@ -88,9 +112,12 @@ def start_game(flag):
         pygame.draw.rect(win,(0,255,0),(power_cords[0],power_cords[1],30,30))
 
         player_cords=get_inputs(player_cords,flag,vel) #When flag==1 we will decide based on decision by AI
+        
         opp_cords=move_opponent(player_cords,opp_cords,score) #Move opponent towards 
-
+        
         player_cords=halt_cords(player_cords)
+
+        dump_dataset(player_cords,power_cords,opp_cords) #Function to create dataset that will generate dataset
         
         o_collision=check_if_collision(player_cords,opp_cords)
         p_collision=check_if_collision(player_cords,power_cords)
