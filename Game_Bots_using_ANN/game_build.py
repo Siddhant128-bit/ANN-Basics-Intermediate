@@ -2,25 +2,45 @@ import pygame
 import random
 import math
 import os
+from  model_train_test import train_model,predict_from_model
 
-def get_inputs(player_cords,flag,vel):
-    if flag==0:
+def get_inputs(player_cords,power_cords,opp_cords,flag,vel):
+    if flag==1:
+        print('Is it here')
         keys=pygame.key.get_pressed()
-        player_cords[2]=[0,0,0,0,1]
+        
+        #player_cords[2]=[0,0,0,0,1]
+        
         if keys[pygame.K_LEFT]:
             player_cords[0]-=vel
-            player_cords[2]=[1,0,0,0,0]
+            player_cords[2]=[1,0,0,0]
 
         elif keys[pygame.K_RIGHT]:
             player_cords[0]+=vel
-            player_cords[2]=[0,1,0,0,0]
+            player_cords[2]=[0,1,0,0]
         
         elif keys[pygame.K_UP]:
             player_cords[1]-=vel
-            player_cords[2]=[0,0,1,0,0]
+            player_cords[2]=[0,0,1,0]
         elif keys[pygame.K_DOWN]:
+            print('Dkey pressed')
             player_cords[1]+=vel
-            player_cords[2]=[0,0,0,1,0]
+            player_cords[2]=[0,0,0,1]
+    else:
+        if 'tf_model.h5' not in os.listdir(os.getcwd()):
+            player_cords[0]+=vel
+        else: 
+            move=predict_from_model([[player_cords[0],player_cords[1],power_cords[0],power_cords[1],opp_cords[0],opp_cords[1]]])
+            if move==0:
+                player_cords[0]-=vel
+            elif move==1:
+                player_cords[0]+=vel  
+            elif move==2: 
+                player_cords[1]-=vel
+            elif move==3:
+                player_cords[1]+=vel
+            else: 
+                player_cords=player_cords
         
     return player_cords
 
@@ -28,13 +48,13 @@ def halt_cords(player_cords):
     
     if player_cords[0]<=0:
         player_cords[0]=0
-    elif player_cords[0]>=470:
-        player_cords[0]=470
+    elif player_cords[0]>=270:
+        player_cords[0]=270
     
     if player_cords[1]<=30:
         player_cords[1]=30
-    elif player_cords[1]>=470:
-        player_cords[1]=470
+    elif player_cords[1]>=270:
+        player_cords[1]=270
     return player_cords
 
 def check_if_collision(cords1,cords2):
@@ -46,7 +66,6 @@ def check_if_collision(cords1,cords2):
 
 def move_opponent(cords1,cords2,score):
     o_vel_increase=3+(score/1000)
-    print(o_vel_increase)
     if cords1[0]<cords2[0]:
         cords2[0]-=o_vel_increase
     elif cords1[0]>cords2[0]:
@@ -65,7 +84,6 @@ def dump_dataset(pl_cords,po_cords,op_cords):
     final_data=','.join([str(i)for i in player_cords])
     final_data=final_data+','+','.join([str(round(i,2)) for i in po_cords])+','+','.join([str(round(i,2)) for i in op_cords])+','+','.join([str(round(i,2)) for i in choices])
 
-    print(final_data)
     try: 
         os.mkdir('Dataset')
     except:
@@ -80,13 +98,13 @@ def start_game(flag):
     run=True
     vel=5
     pygame.init()
-    win=pygame.display.set_mode((500,500))
+    win=pygame.display.set_mode((300,300))
 
-    player_cords=[255,255,[0,0,0,0]]
-    opp_cords=[random.randrange(0,470),random.randrange(30,470)]
-    power_cords=[random.randrange(0,470),random.randrange(30,470)]
+    player_cords=[150,150,[0,0,0,0]]
+    opp_cords=[random.randrange(0,270),random.randrange(30,270)]
+    power_cords=[random.randrange(0,270),random.randrange(30,270)]
     score=0
-    font = pygame.font.Font('freesansbold.ttf', 25)
+    font = pygame.font.Font('freesansbold.ttf', 10)
     health=100
 
     while run: 
@@ -98,44 +116,40 @@ def start_game(flag):
             
         text = font.render('            Score: '+str(score)+'   Health:  '+str(health)+'    High Score: '+str(h_score), True, (255,255,255), (0,0,0))
         textRect = text.get_rect()
-        textRect.center=(200,15)
+        textRect.center=(100,15)
         win.blit(text, textRect)
 
         
         #Player character: 
-        pygame.draw.rect(win,(0,0,255),(player_cords[0],player_cords[1],30,30))
+        pygame.draw.rect(win,(0,0,255),(player_cords[0],player_cords[1],20,20))
 
         #Opponent character: 
-        pygame.draw.rect(win,(255,0,0),(opp_cords[0],opp_cords[1],30,30))
+        pygame.draw.rect(win,(255,0,0),(opp_cords[0],opp_cords[1],20,20))
 
         #Power character: 
-        pygame.draw.rect(win,(0,255,0),(power_cords[0],power_cords[1],30,30))
+        pygame.draw.rect(win,(0,255,0),(power_cords[0],power_cords[1],20,20))
 
-        player_cords=get_inputs(player_cords,flag,vel) #When flag==1 we will decide based on decision by AI
+        player_cords=get_inputs(player_cords,power_cords,opp_cords,flag,vel) #When flag==2 we will decide based on decision by AI
         
         opp_cords=move_opponent(player_cords,opp_cords,score) #Move opponent towards 
         
         player_cords=halt_cords(player_cords)
-
-        dump_dataset(player_cords,power_cords,opp_cords) #Function to create dataset that will generate dataset
-        
+        if flag==1:
+            dump_dataset(player_cords,power_cords,opp_cords) #Function to create dataset that will generate dataset
         o_collision=check_if_collision(player_cords,opp_cords)
         p_collision=check_if_collision(player_cords,power_cords)
-        #print(f'Opp collision: {o_collision} , Power Collision: {p_collision}')
 
         if p_collision==1:
             vel=100
             score+=p_collision*10
             health+=p_collision*5
-            power_cords[0]=random.randrange(0,470)
-            power_cords[1]=random.randrange(30,470)
+            power_cords[0]=random.randrange(0,270)
+            power_cords[1]=random.randrange(30,270)
         else: 
             vel=5
-        #p_collision=check_if_collision(player_cords,power_cords)
 
         if o_collision==1:
             health-=o_collision*1
-            #print(health)
 
 
         for event in pygame.event.get():
@@ -148,7 +162,12 @@ def start_game(flag):
                     
         pygame.display.update()
         win.fill((0,0,0))
-        pygame.time.delay(20)
+        
+        if flag==1:
+            pygame.time.delay(15)
+        else: 
+            pygame.time.delay(0)
+
         if health==0:
             run=False
     
@@ -160,4 +179,13 @@ def start_game(flag):
 
 
 if __name__=='__main__':
-    start_game(0)
+    choice=2
+    if choice==1:
+        start_game(1)
+    else: 
+        for i in range(0,choice*10):
+            start_game(2)
+            try:
+                train_model()
+            except:
+                print('No Dataset found Please play the game once to generate dataset')
