@@ -46,7 +46,7 @@ def train_model():
 
     model=create_model(X_train,y_train)
     
-    model.fit(X_train,y_train,epochs=1500,validation_data=(X_test,y_test),shuffle=True,batch_size=64)
+    model.fit(X_train,y_train,epochs=15,validation_data=(X_test,y_test),shuffle=True,batch_size=64)
     model.save('tf_model.h5')
 
 def predict_from_model(prediction_data):
