@@ -15,29 +15,29 @@ def create_model(X_train,y_train):
         model.add(layers.Dense(units=32,activation='relu',input_dim=X_train.shape[1])) #1st layer with 6 inputs
         model.add(layers.Dense(units=64,activation='relu'))
         model.add(layers.Dense(units=128,activation='relu'))
-        model.add(layers.Dense(units=128*2,activation='relu'))
-        model.add(layers.Dense(units=128*3,activation='relu'))
+        #model.add(layers.Dense(units=128*2,activation='relu'))
+        #model.add(layers.Dense(units=128*3,activation='relu'))
 
-        model.add(layers.Dense(units=128*4,activation='relu'))
-        model.add(layers.Dense(units=128*3,activation='relu'))
-        model.add(layers.Dense(units=128*2,activation='relu'))
-        model.add(layers.Dense(units=128,activation='relu'))
+        #model.add(layers.Dense(units=128*4,activation='relu'))
+        #model.add(layers.Dense(units=128*3,activation='relu'))
+        #model.add(layers.Dense(units=128*2,activation='relu'))
+        #model.add(layers.Dense(units=128,activation='relu'))
         model.add(layers.Dense(units=64,activation='relu'))
         model.add(layers.Dense(units=32,activation='relu'))
 
-        model.add(layers.Dense(units=y_train.shape[1],activation='sigmoid'))
-        model.compile(loss='binary_crossentropy',optimizer='sgd',metrics='accuracy')
+        model.add(layers.Dense(units=4,activation='softmax'))
+        model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),metrics='accuracy')
     
     return model 
 
 
 def load_data(path):
     data=pd.read_csv('Dataset\\data.csv')
+    data=data.dropna()
     data = data.astype(float)
-    print(data)
-    data.columns=['playerx','playery','powerx','powery','oppx','oppy','l','r','u','d']
-    X=np.array(data[['playerx','playery','powerx','powery','oppx','oppy']])
-    Y=np.array(data[['l','r','u','d']])
+    data.columns=['playerx','playery','powerx','powery','oppx','oppy','a']
+    X=np.array(data[['playerx','playery','powerx','powery','oppx','oppy']]).astype(np.float32)
+    Y=(np.array(data[['a']]).astype(np.float32)).reshape(-1,1)
     return X,Y
 
 def train_model():
@@ -46,14 +46,16 @@ def train_model():
 
     model=create_model(X_train,y_train)
     
-    model.fit(X_train,y_train,epochs=15,validation_data=(X_test,y_test),shuffle=True,batch_size=16)
+    model.fit(X_train,y_train,epochs=15,validation_data=(X_test,y_test),shuffle=True,batch_size=64)
     model.save('tf_model.h5')
 
 def predict_from_model(prediction_data):
     model=models.load_model('tf_model.h5')
-    print(model.predict([np.array(prediction_data)]))
+    moves=['left','right','up','down']
     output=np.argmax(model.predict([np.array(prediction_data)][0]))
+    print(moves[output])
     return output
 
-#train_model()
-#print(predict_from_model([[100,170,288,31,207.92,207.92]]))
+if __name__=='__main__':
+    train_model()
+    print(predict_from_model([[150,155,8,177,151.0,86.0]]))
