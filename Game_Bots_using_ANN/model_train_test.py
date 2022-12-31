@@ -38,7 +38,6 @@ def load_data(path):
     data.columns=['playerx','playery','powerx','powery','oppx','oppy','a']
     X=np.array(data[['playerx','playery','powerx','powery','oppx','oppy']]).astype(np.float32)
     Y=(np.array(data[['a']]).astype(np.float32)).reshape(-1,1)
-    print(data)
     return X,Y
 
 def train_model():
@@ -52,8 +51,9 @@ def train_model():
 
 def predict_from_model(prediction_data):
     model=models.load_model('tf_model.h5')
-    print(model.predict([np.array(prediction_data)]))
+    moves=['left','right','up','down']
     output=np.argmax(model.predict([np.array(prediction_data)][0]))
+    print(moves[output])
     return output
 
 if __name__=='__main__':

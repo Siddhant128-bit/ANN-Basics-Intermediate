@@ -6,7 +6,6 @@ from  model_train_test import train_model,predict_from_model
 
 def get_inputs(player_cords,power_cords,opp_cords,flag,vel):
     if flag==1:
-        print('Is it here')
         keys=pygame.key.get_pressed()
         
         #player_cords[2]=[0,0,0,0,1]
@@ -23,7 +22,6 @@ def get_inputs(player_cords,power_cords,opp_cords,flag,vel):
             player_cords[1]-=vel
             player_cords[2]=[2]
         elif keys[pygame.K_DOWN]:
-            print('Dkey pressed')
             player_cords[1]+=vel
             player_cords[2]=[3]
     else:
@@ -164,7 +162,7 @@ def start_game(flag):
         win.fill((0,0,0))
         
         if flag==1:
-            pygame.time.delay(25)
+            pygame.time.delay(20)
         else: 
             pygame.time.delay(0)
 
@@ -179,8 +177,7 @@ def start_game(flag):
 
 
 if __name__=='__main__':
-    choice=2
-    print(choice)
+    choice=1
     if choice==1:
         start_game(1)
         
