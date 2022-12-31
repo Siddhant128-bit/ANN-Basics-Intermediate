@@ -13,19 +13,19 @@ def get_inputs(player_cords,power_cords,opp_cords,flag,vel):
         
         if keys[pygame.K_LEFT]:
             player_cords[0]-=vel
-            player_cords[2]=[1,0,0,0]
+            player_cords[2]=[0]
 
         elif keys[pygame.K_RIGHT]:
             player_cords[0]+=vel
-            player_cords[2]=[0,1,0,0]
+            player_cords[2]=[1]
         
         elif keys[pygame.K_UP]:
             player_cords[1]-=vel
-            player_cords[2]=[0,0,1,0]
+            player_cords[2]=[2]
         elif keys[pygame.K_DOWN]:
             print('Dkey pressed')
             player_cords[1]+=vel
-            player_cords[2]=[0,0,0,1]
+            player_cords[2]=[3]
     else:
         if 'tf_model.h5' not in os.listdir(os.getcwd()):
             player_cords[0]+=vel
@@ -100,7 +100,7 @@ def start_game(flag):
     pygame.init()
     win=pygame.display.set_mode((300,300))
 
-    player_cords=[150,150,[0,0,0,0]]
+    player_cords=[150,150,[]]
     opp_cords=[random.randrange(0,270),random.randrange(30,270)]
     power_cords=[random.randrange(0,270),random.randrange(30,270)]
     score=0
@@ -164,7 +164,7 @@ def start_game(flag):
         win.fill((0,0,0))
         
         if flag==1:
-            pygame.time.delay(15)
+            pygame.time.delay(25)
         else: 
             pygame.time.delay(0)
 
@@ -180,8 +180,10 @@ def start_game(flag):
 
 if __name__=='__main__':
     choice=2
+    print(choice)
     if choice==1:
         start_game(1)
+        
     else: 
         for i in range(0,choice*10):
             start_game(2)
